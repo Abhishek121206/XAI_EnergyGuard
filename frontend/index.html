@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>XAI-EnergyGuard</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="app">
+
+        <!-- ==========================================
+             SIDEBAR
+        =========================================== -->
+
+        <aside class="sidebar">
+
+            <div class="brand">
+                <div class="brand-mark">E</div>
+
+                <div>
+                    <h1>EnergyGuard</h1>
+                    <p>Energy Intelligence</p>
+                </div>
+            </div>
+
+
+            <nav class="navigation">
+
+                <button
+                    class="nav-item active"
+                    data-section="overview"
+                >
+                    <span>01</span>
+                    Overview
+                </button>
+
+                <button
+                    class="nav-item"
+                    data-section="anomalies"
+                >
+                    <span>02</span>
+                    Anomalies
+                </button>
+
+                <button
+                    class="nav-item"
+                    data-section="explanations"
+                >
+                    <span>03</span>
+                    Explanations
+                </button>
+
+            </nav>
+
+
+            <div class="sidebar-status">
+
+                <div class="status-dot"></div>
+
+                <div>
+                    <strong>Backend</strong>
+                    <p id="backendStatus">
+                        Checking...
+                    </p>
+                </div>
+
+            </div>
+
+        </aside>
+
+
+        <!-- ==========================================
+             MAIN
+        =========================================== -->
+
+        <main class="main">
+
+            <!-- HEADER -->
+
+            <header class="topbar">
+
+                <div>
+                    <p class="eyebrow">
+                        XAI-ENERGYGUARD
+                    </p>
+
+                    <h2 id="pageTitle">
+                        Energy Overview
+                    </h2>
+                </div>
+
+                <div class="header-right">
+
+                    <div class="live-indicator">
+                        <span></span>
+                        LIVE
+                    </div>
+
+                    <div class="circuit-badge">
+                        Circuit C1
+                    </div>
+
+                </div>
+
+            </header>
+
+
+            <!-- ======================================
+                 OVERVIEW
+            ======================================= -->
+
+            <section
+                id="overview"
+                class="page-section active"
+            >
+
+                <!-- STAT CARDS -->
+
+                <div class="stats-grid">
+
+                    <div class="stat-card">
+
+                        <div class="stat-label">
+                            CURRENT POWER
+                        </div>
+
+                        <div
+                            class="stat-value"
+                            id="currentPower"
+                        >
+                            --
+                        </div>
+
+                        <div class="stat-unit">
+                            watts
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-label">
+                            PRESENCE
+                        </div>
+
+                        <div
+                            class="stat-value"
+                            id="currentPresence"
+                        >
+                            --
+                        </div>
+
+                        <div
+                            class="stat-sub"
+                            id="presenceDetail"
+                        >
+                            --
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-label">
+                            TOTAL READINGS
+                        </div>
+
+                        <div
+                            class="stat-value"
+                            id="totalReadings"
+                        >
+                            --
+                        </div>
+
+                        <div class="stat-sub">
+                            collected
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card alert-card">
+
+                        <div class="stat-label">
+                            ANOMALIES
+                        </div>
+
+                        <div
+                            class="stat-value"
+                            id="anomalyCount"
+                        >
+                            --
+                        </div>
+
+                        <div class="stat-sub">
+                            detected
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- SENSOR GRID -->
+
+                <div class="content-grid">
+
+                    <div class="panel">
+
+                        <div class="panel-header">
+
+                            <div>
+                                <p class="panel-kicker">
+                                    SENSOR DATA
+                                </p>
+
+                                <h3>
+                                    Latest Reading
+                                </h3>
+                            </div>
+
+                            <span
+                                class="timestamp"
+                                id="latestTimestamp"
+                            >
+                                --
+                            </span>
+
+                        </div>
+
+
+                        <div class="sensor-grid">
+
+                            <div class="sensor-item">
+                                <span>Temperature</span>
+                                <strong id="temperature">
+                                    --
+                                </strong>
+                                <small>°C</small>
+                            </div>
+
+                            <div class="sensor-item">
+                                <span>Humidity</span>
+                                <strong id="humidity">
+                                    --
+                                </strong>
+                                <small>%</small>
+                            </div>
+
+                            <div class="sensor-item">
+                                <span>Current</span>
+                                <strong id="current">
+                                    --
+                                </strong>
+                                <small>A</small>
+                            </div>
+
+                            <div class="sensor-item">
+                                <span>Voltage</span>
+                                <strong id="voltage">
+                                    --
+                                </strong>
+                                <small>V</small>
+                            </div>
+
+                            <div class="sensor-item">
+                                <span>Distance</span>
+                                <strong id="distance">
+                                    --
+                                </strong>
+                                <small>cm</small>
+                            </div>
+
+                            <div class="sensor-item">
+                                <span>Status</span>
+                                <strong
+                                    id="currentStatus"
+                                    class="status-text"
+                                >
+                                    --
+                                </strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- LATEST ALERT -->
+
+                    <div class="panel alert-panel">
+
+                        <div class="panel-header">
+
+                            <div>
+                                <p class="panel-kicker">
+                                    ATTENTION
+                                </p>
+
+                                <h3>
+                                    Latest Anomaly
+                                </h3>
+                            </div>
+
+                            <span class="badge">
+                                AI
+                            </span>
+
+                        </div>
+
+
+                        <div id="latestAnomaly">
+                            <div class="empty-state">
+                                No anomaly available
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- RECENT DATA -->
+
+                <div class="panel">
+
+                    <div class="panel-header">
+
+                        <div>
+                            <p class="panel-kicker">
+                                TELEMETRY
+                            </p>
+
+                            <h3>
+                                Recent Readings
+                            </h3>
+                        </div>
+
+                    </div>
+
+
+                    <div class="table-wrapper">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Power</th>
+                                    <th>Current</th>
+                                    <th>Presence</th>
+                                    <th>Temperature</th>
+                                    <th>Status</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="readingsTable">
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ======================================
+                 ANOMALIES
+            ======================================= -->
+
+            <section
+                id="anomalies"
+                class="page-section"
+            >
+
+                <div class="section-heading">
+
+                    <p class="panel-kicker">
+                        DETECTION
+                    </p>
+
+                    <h3>
+                        Detected Anomalies
+                    </h3>
+
+                    <p>
+                        Readings flagged by the anomaly detection
+                        and classification pipeline.
+                    </p>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="table-wrapper">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Power</th>
+                                    <th>Presence</th>
+                                    <th>Type</th>
+                                    <th>Confidence</th>
+                                    <th>Score</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="anomaliesTable">
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ======================================
+                 EXPLANATIONS
+            ======================================= -->
+
+            <section
+                id="explanations"
+                class="page-section"
+            >
+
+                <div class="section-heading">
+
+                    <p class="panel-kicker">
+                        EXPLAINABLE AI
+                    </p>
+
+                    <h3>
+                        AI Explanations
+                    </h3>
+
+                    <p>
+                        The same detected event explained for
+                        different users.
+                    </p>
+
+                </div>
+
+
+                <div
+                    class="explanations-grid"
+                    id="explanationsContainer"
+                >
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <script src="script.js"></script>
+
+</body>
+</html>

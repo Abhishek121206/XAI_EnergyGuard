@@ -1,0 +1,318 @@
+timestamp,original_power_W,counterfactual_power_W,power_reduction_W,message
+1789846536,0.896,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846537,0.972,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846538,0.966,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846538,3.179,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846539,0.746,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846540,2.819,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846541,0.88,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846542,0.783,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846543,0.935,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846543,1.002,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846544,0.0,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846545,0.935,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846546,0.819,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846547,0.99,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846548,0.832,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846549,0.347,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846549,0.832,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846550,0.893,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846551,0.874,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846552,1.07,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846553,0.182,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846554,0.947,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846555,0.966,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846558,0.74,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846560,0.874,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846563,0.746,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846564,0.508,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846565,0.825,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789846567,0.0,,,No valid power-reducing counterfactual found
+1789846567,0.258,,,No valid power-reducing counterfactual found
+1789846569,0.306,,,No valid power-reducing counterfactual found
+1789846570,0.282,,,No valid power-reducing counterfactual found
+1789846571,0.361,,,No valid power-reducing counterfactual found
+1789846572,0.823,0.6,0.223,Reducing power from 0.823 W to approximately 0.600 W would move this reading toward the normal region of the anomaly detector.
+1789846573,0.319,,,No valid power-reducing counterfactual found
+1789846574,0.227,,,No valid power-reducing counterfactual found
+1789846575,0.435,,,No valid power-reducing counterfactual found
+1789846576,0.435,,,No valid power-reducing counterfactual found
+1789846577,0.835,0.6,0.235,Reducing power from 0.835 W to approximately 0.600 W would move this reading toward the normal region of the anomaly detector.
+1789912596,4.121,1.5,2.621,Reducing power from 4.121 W to approximately 1.500 W would move this reading toward the normal region of the anomaly detector.
+1789912632,4.225,2.0,2.225,Reducing power from 4.225 W to approximately 2.000 W would move this reading toward the normal region of the anomaly detector.
+1789912633,4.426,2.8,1.626,Reducing power from 4.426 W to approximately 2.800 W would move this reading toward the normal region of the anomaly detector.
+1789912698,3.327,1.4,1.927,Reducing power from 3.327 W to approximately 1.400 W would move this reading toward the normal region of the anomaly detector.
+1789912720,4.591,3.0,1.591,Reducing power from 4.591 W to approximately 3.000 W would move this reading toward the normal region of the anomaly detector.
+1789912750,4.707,3.4,1.307,Reducing power from 4.707 W to approximately 3.400 W would move this reading toward the normal region of the anomaly detector.
+1789912769,4.493,3.1,1.393,Reducing power from 4.493 W to approximately 3.100 W would move this reading toward the normal region of the anomaly detector.
+1789912770,3.443,2.2,1.243,Reducing power from 3.443 W to approximately 2.200 W would move this reading toward the normal region of the anomaly detector.
+1789912776,4.628,3.0,1.628,Reducing power from 4.628 W to approximately 3.000 W would move this reading toward the normal region of the anomaly detector.
+1789980834,26.792,12.7,14.092,Reducing power from 26.792 W to approximately 12.700 W would move this reading toward the normal region of the anomaly detector.
+1789980838,21.719,16.9,4.819,Reducing power from 21.719 W to approximately 16.900 W would move this reading toward the normal region of the anomaly detector.
+1789980880,23.123,16.4,6.723,Reducing power from 23.123 W to approximately 16.400 W would move this reading toward the normal region of the anomaly detector.
+1789980881,16.829,12.0,4.829,Reducing power from 16.829 W to approximately 12.000 W would move this reading toward the normal region of the anomaly detector.
+1789980886,21.206,18.6,2.606,Reducing power from 21.206 W to approximately 18.600 W would move this reading toward the normal region of the anomaly detector.
+1789980889,23.007,20.0,3.007,Reducing power from 23.007 W to approximately 20.000 W would move this reading toward the normal region of the anomaly detector.
+1789980890,20.669,13.6,7.069,Reducing power from 20.669 W to approximately 13.600 W would move this reading toward the normal region of the anomaly detector.
+1789980891,20.95,13.9,7.05,Reducing power from 20.950 W to approximately 13.900 W would move this reading toward the normal region of the anomaly detector.
+1789980907,23.093,18.1,4.993,Reducing power from 23.093 W to approximately 18.100 W would move this reading toward the normal region of the anomaly detector.
+1789980947,18.538,12.2,6.338,Reducing power from 18.538 W to approximately 12.200 W would move this reading toward the normal region of the anomaly detector.
+1789980970,20.504,19.0,1.504,Reducing power from 20.504 W to approximately 19.000 W would move this reading toward the normal region of the anomaly detector.
+1789980971,24.259,17.5,6.759,Reducing power from 24.259 W to approximately 17.500 W would move this reading toward the normal region of the anomaly detector.
+1789980972,26.762,14.3,12.462,Reducing power from 26.762 W to approximately 14.300 W would move this reading toward the normal region of the anomaly detector.
+1789980973,22.91,10.3,12.61,Reducing power from 22.910 W to approximately 10.300 W would move this reading toward the normal region of the anomaly detector.
+1789980975,22.33,13.8,8.53,Reducing power from 22.330 W to approximately 13.800 W would move this reading toward the normal region of the anomaly detector.
+1789980975,23.343,14.5,8.843,Reducing power from 23.343 W to approximately 14.500 W would move this reading toward the normal region of the anomaly detector.
+1789980997,20.498,12.6,7.898,Reducing power from 20.498 W to approximately 12.600 W would move this reading toward the normal region of the anomaly detector.
+1789981002,20.547,14.9,5.647,Reducing power from 20.547 W to approximately 14.900 W would move this reading toward the normal region of the anomaly detector.
+1789981004,27.965,14.2,13.765,Reducing power from 27.965 W to approximately 14.200 W would move this reading toward the normal region of the anomaly detector.
+1789981007,20.23,15.6,4.63,Reducing power from 20.230 W to approximately 15.600 W would move this reading toward the normal region of the anomaly detector.
+1789981008,20.516,11.8,8.716,Reducing power from 20.516 W to approximately 11.800 W would move this reading toward the normal region of the anomaly detector.
+1789981010,31.573,9.9,21.673,Reducing power from 31.573 W to approximately 9.900 W would move this reading toward the normal region of the anomaly detector.
+1789981016,18.294,9.4,8.894,Reducing power from 18.294 W to approximately 9.400 W would move this reading toward the normal region of the anomaly detector.
+1789981034,20.028,18.9,1.128,Reducing power from 20.028 W to approximately 18.900 W would move this reading toward the normal region of the anomaly detector.
+1789981039,21.518,19.5,2.018,Reducing power from 21.518 W to approximately 19.500 W would move this reading toward the normal region of the anomaly detector.
+1789981040,21.493,15.8,5.693,Reducing power from 21.493 W to approximately 15.800 W would move this reading toward the normal region of the anomaly detector.
+1789981192,21.475,16.8,4.675,Reducing power from 21.475 W to approximately 16.800 W would move this reading toward the normal region of the anomaly detector.
+1789981194,22.635,15.2,7.435,Reducing power from 22.635 W to approximately 15.200 W would move this reading toward the normal region of the anomaly detector.
+1789981195,20.962,12.0,8.962,Reducing power from 20.962 W to approximately 12.000 W would move this reading toward the normal region of the anomaly detector.
+1789981200,22.928,18.4,4.528,Reducing power from 22.928 W to approximately 18.400 W would move this reading toward the normal region of the anomaly detector.
+1789981201,21.786,12.9,8.886,Reducing power from 21.786 W to approximately 12.900 W would move this reading toward the normal region of the anomaly detector.
+1789981202,22.366,14.9,7.466,Reducing power from 22.366 W to approximately 14.900 W would move this reading toward the normal region of the anomaly detector.
+1789981203,22.22,16.0,6.22,Reducing power from 22.220 W to approximately 16.000 W would move this reading toward the normal region of the anomaly detector.
+1789981206,22.44,7.1,15.34,Reducing power from 22.440 W to approximately 7.100 W would move this reading toward the normal region of the anomaly detector.
+1789981207,22.336,17.1,5.236,Reducing power from 22.336 W to approximately 17.100 W would move this reading toward the normal region of the anomaly detector.
+1789981208,22.562,16.1,6.462,Reducing power from 22.562 W to approximately 16.100 W would move this reading toward the normal region of the anomaly detector.
+1789981213,24.076,12.5,11.576,Reducing power from 24.076 W to approximately 12.500 W would move this reading toward the normal region of the anomaly detector.
+1789981214,21.585,20.3,1.285,Reducing power from 21.585 W to approximately 20.300 W would move this reading toward the normal region of the anomaly detector.
+1789981215,22.525,14.6,7.925,Reducing power from 22.525 W to approximately 14.600 W would move this reading toward the normal region of the anomaly detector.
+1789981216,25.26,18.5,6.76,Reducing power from 25.260 W to approximately 18.500 W would move this reading toward the normal region of the anomaly detector.
+1789981218,23.154,9.8,13.354,Reducing power from 23.154 W to approximately 9.800 W would move this reading toward the normal region of the anomaly detector.
+1789981223,23.38,8.0,15.38,Reducing power from 23.380 W to approximately 8.000 W would move this reading toward the normal region of the anomaly detector.
+1789981224,22.653,9.5,13.153,Reducing power from 22.653 W to approximately 9.500 W would move this reading toward the normal region of the anomaly detector.
+1789981226,22.275,14.6,7.675,Reducing power from 22.275 W to approximately 14.600 W would move this reading toward the normal region of the anomaly detector.
+1789981227,22.659,20.3,2.359,Reducing power from 22.659 W to approximately 20.300 W would move this reading toward the normal region of the anomaly detector.
+1789981228,22.11,19.5,2.61,Reducing power from 22.110 W to approximately 19.500 W would move this reading toward the normal region of the anomaly detector.
+1789981229,23.026,7.6,15.426,Reducing power from 23.026 W to approximately 7.600 W would move this reading toward the normal region of the anomaly detector.
+1789981229,22.556,18.7,3.856,Reducing power from 22.556 W to approximately 18.700 W would move this reading toward the normal region of the anomaly detector.
+1789981243,21.683,15.4,6.283,Reducing power from 21.683 W to approximately 15.400 W would move this reading toward the normal region of the anomaly detector.
+1789981244,22.379,6.6,15.779,Reducing power from 22.379 W to approximately 6.600 W would move this reading toward the normal region of the anomaly detector.
+1789981245,23.966,13.9,10.066,Reducing power from 23.966 W to approximately 13.900 W would move this reading toward the normal region of the anomaly detector.
+1789981246,23.093,20.8,2.293,Reducing power from 23.093 W to approximately 20.800 W would move this reading toward the normal region of the anomaly detector.
+1789981253,23.392,8.2,15.192,Reducing power from 23.392 W to approximately 8.200 W would move this reading toward the normal region of the anomaly detector.
+1789981255,22.897,21.0,1.897,Reducing power from 22.897 W to approximately 21.000 W would move this reading toward the normal region of the anomaly detector.
+1789981262,22.586,14.1,8.486,Reducing power from 22.586 W to approximately 14.100 W would move this reading toward the normal region of the anomaly detector.
+1789981262,22.519,20.3,2.219,Reducing power from 22.519 W to approximately 20.300 W would move this reading toward the normal region of the anomaly detector.
+1789981288,22.531,9.5,13.031,Reducing power from 22.531 W to approximately 9.500 W would move this reading toward the normal region of the anomaly detector.
+1789981289,21.274,11.7,9.574,Reducing power from 21.274 W to approximately 11.700 W would move this reading toward the normal region of the anomaly detector.
+1789981289,22.336,15.4,6.936,Reducing power from 22.336 W to approximately 15.400 W would move this reading toward the normal region of the anomaly detector.
+1789981306,25.797,16.1,9.697,Reducing power from 25.797 W to approximately 16.100 W would move this reading toward the normal region of the anomaly detector.
+1789981306,17.299,15.9,1.399,Reducing power from 17.299 W to approximately 15.900 W would move this reading toward the normal region of the anomaly detector.
+1789981307,23.27,16.6,6.67,Reducing power from 23.270 W to approximately 16.600 W would move this reading toward the normal region of the anomaly detector.
+1789981308,25.26,10.9,14.36,Reducing power from 25.260 W to approximately 10.900 W would move this reading toward the normal region of the anomaly detector.
+1789981309,18.02,14.6,3.42,Reducing power from 18.020 W to approximately 14.600 W would move this reading toward the normal region of the anomaly detector.
+1789981310,25.462,14.0,11.462,Reducing power from 25.462 W to approximately 14.000 W would move this reading toward the normal region of the anomaly detector.
+1789981311,24.442,16.4,8.042,Reducing power from 24.442 W to approximately 16.400 W would move this reading toward the normal region of the anomaly detector.
+1789981312,25.712,19.1,6.612,Reducing power from 25.712 W to approximately 19.100 W would move this reading toward the normal region of the anomaly detector.
+1789981313,27.208,6.4,20.808,Reducing power from 27.208 W to approximately 6.400 W would move this reading toward the normal region of the anomaly detector.
+1789981314,25.486,17.6,7.886,Reducing power from 25.486 W to approximately 17.600 W would move this reading toward the normal region of the anomaly detector.
+1789981315,25.913,18.6,7.313,Reducing power from 25.913 W to approximately 18.600 W would move this reading toward the normal region of the anomaly detector.
+1789981317,17.672,16.7,0.972,Reducing power from 17.672 W to approximately 16.700 W would move this reading toward the normal region of the anomaly detector.
+1789981319,18.392,7.3,11.092,Reducing power from 18.392 W to approximately 7.300 W would move this reading toward the normal region of the anomaly detector.
+1789981592,23.795,17.9,5.895,Reducing power from 23.795 W to approximately 17.900 W would move this reading toward the normal region of the anomaly detector.
+1789987063,1.921,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987064,3.672,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987065,2.44,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987066,13.569,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987066,1.151,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987067,12.208,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987068,1.676,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987069,12.836,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987070,3.19,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987071,0.828,,,No valid power-reducing counterfactual found
+1789987072,0.48,,,No valid power-reducing counterfactual found
+1789987072,1.035,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987073,12.098,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987074,0.926,,,No valid power-reducing counterfactual found
+1789987075,1.231,,,No valid power-reducing counterfactual found
+1789987079,0.344,,,No valid power-reducing counterfactual found
+1789987081,0.541,,,No valid power-reducing counterfactual found
+1789987083,0.797,,,No valid power-reducing counterfactual found
+1789987083,11.402,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987084,12.879,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987085,2.024,,,No valid power-reducing counterfactual found
+1789987086,0.228,,,No valid power-reducing counterfactual found
+1789987087,0.228,,,No valid power-reducing counterfactual found
+1789987088,1.493,,,No valid power-reducing counterfactual found
+1789987088,1.274,,,No valid power-reducing counterfactual found
+1789987089,0.993,,,No valid power-reducing counterfactual found
+1789987090,0.112,,,No valid power-reducing counterfactual found
+1789987091,0.625,,,No valid power-reducing counterfactual found
+1789987092,11.695,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987094,0.748,,,No valid power-reducing counterfactual found
+1789987095,11.774,10.8,0.974,Reducing power from 11.774 W to approximately 10.800 W would move this reading toward the normal region of the anomaly detector.
+1789987097,13.239,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987098,13.905,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987099,13.02,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987099,1.151,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987100,14.845,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987101,1.927,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987102,1.054,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987103,0.357,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987104,13.972,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987105,1.396,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987105,11.493,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987106,0.0,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987107,10.724,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987108,11.005,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987109,11.078,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987110,10.327,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987110,2.096,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987111,1.779,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987112,4.081,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987114,0.967,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987115,2.353,1.8,0.553,Reducing power from 2.353 W to approximately 1.800 W would move this reading toward the normal region of the anomaly detector.
+1789987116,2.878,,,No valid power-reducing counterfactual found
+1789987116,2.243,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987117,10.547,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987118,2.341,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987119,10.101,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987120,3.672,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987121,3.11,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987121,8.496,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987122,11.847,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987124,9.46,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987126,10.254,,,No valid power-reducing counterfactual found
+1789987130,9.875,,,No valid power-reducing counterfactual found
+1789987133,10.431,,,No valid power-reducing counterfactual found
+1789987134,9.906,,,No valid power-reducing counterfactual found
+1789987135,9.894,,,No valid power-reducing counterfactual found
+1789987138,9.497,,,No valid power-reducing counterfactual found
+1789987139,9.857,,,No valid power-reducing counterfactual found
+1789987139,10.12,,,No valid power-reducing counterfactual found
+1789987140,9.161,,,No valid power-reducing counterfactual found
+1789987142,8.502,,,No valid power-reducing counterfactual found
+1789987143,8.825,,,No valid power-reducing counterfactual found
+1789987144,8.905,,,No valid power-reducing counterfactual found
+1789987144,9.357,,,No valid power-reducing counterfactual found
+1789987145,23.032,13.2,9.832,Reducing power from 23.032 W to approximately 13.200 W would move this reading toward the normal region of the anomaly detector.
+1789987146,12.842,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987147,10.639,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987148,19.387,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987149,8.984,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987150,25.144,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987150,3.495,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987152,11.457,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987152,14.772,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987153,18.593,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987154,4.918,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987155,10.437,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987156,22.629,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987156,10.944,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987157,10.15,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987158,21.731,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987159,8.996,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987160,9.399,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987161,22.165,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987161,18.905,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987162,19.283,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987163,20.846,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987164,21.438,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987165,21.115,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987166,21.115,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987167,20.584,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987167,21.737,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987168,20.956,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987169,20.724,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987170,21.005,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987171,9.308,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987172,22.183,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987173,19.979,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987174,18.545,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987174,24.973,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987175,14.808,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987176,24.943,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987177,25.724,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987178,22.208,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987179,6.182,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987179,18.02,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987180,18.496,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987181,17.745,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987182,17.598,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987183,18.923,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987184,19.07,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987185,19.002,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987185,19.35,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987186,18.294,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987187,17.476,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987188,18.227,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987189,20.15,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987190,18.697,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987191,19.076,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987192,19.589,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987192,16.994,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987193,18.764,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987194,17.806,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987195,17.061,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987196,18.49,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987197,19.357,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987198,19.039,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987198,19.424,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987199,18.88,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987200,6.048,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987201,18.52,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987202,18.392,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987203,18.899,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987204,17.946,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987204,17.714,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987205,17.537,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987206,18.74,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987207,18.099,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987208,16.915,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987209,18.117,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987210,20.321,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987210,19.1,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987211,17.44,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987212,6.121,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987213,17.366,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1789987214,5.309,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1790105159,0.374,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1790105160,0.691,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1790105160,0.172,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1790105161,0.0,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1790105162,1.47,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1790105163,0.0,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1790105164,0.947,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1790105165,0.121,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1790105166,1.265,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1790105166,1.161,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1790105169,5.127,2.7,2.427,Reducing power from 5.127 W to approximately 2.700 W would move this reading toward the normal region of the anomaly detector.
+1790105170,1.253,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1790105171,0.783,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1790105171,1.241,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1790105172,0.206,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1790105176,4.126,3.0,1.126,Reducing power from 4.126 W to approximately 3.000 W would move this reading toward the normal region of the anomaly detector.
+1790105177,0.0,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1790105178,1.033,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1790105178,4.785,2.9,1.885,Reducing power from 4.785 W to approximately 2.900 W would move this reading toward the normal region of the anomaly detector.
+1790105181,5.225,2.8,2.425,Reducing power from 5.225 W to approximately 2.800 W would move this reading toward the normal region of the anomaly detector.
+1790105184,0.188,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1790105187,0.941,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1790105188,0.444,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1790105188,1.271,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1790105189,4.694,2.0,2.694,Reducing power from 4.694 W to approximately 2.000 W would move this reading toward the normal region of the anomaly detector.
+1790105190,0.0,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1790105191,1.002,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1790105193,4.382,1.6,2.782,Reducing power from 4.382 W to approximately 1.600 W would move this reading toward the normal region of the anomaly detector.
+1790105193,0.996,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1790105194,0.136,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1790105198,0.667,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1790105199,0.966,,,DiCE error: No counterfactuals found for any of the query points! Kindly check your configuration.
+1790105208,5.2,3.2,2.0,Reducing power from 5.200 W to approximately 3.200 W would move this reading toward the normal region of the anomaly detector.
+1790105222,4.199,2.2,1.999,Reducing power from 4.199 W to approximately 2.200 W would move this reading toward the normal region of the anomaly detector.
+1790105230,5.078,3.3,1.778,Reducing power from 5.078 W to approximately 3.300 W would move this reading toward the normal region of the anomaly detector.
+1790105238,5.487,1.8,3.687,Reducing power from 5.487 W to approximately 1.800 W would move this reading toward the normal region of the anomaly detector.
+1790105253,4.877,2.0,2.877,Reducing power from 4.877 W to approximately 2.000 W would move this reading toward the normal region of the anomaly detector.
+1790105254,5.713,2.9,2.813,Reducing power from 5.713 W to approximately 2.900 W would move this reading toward the normal region of the anomaly detector.
+1790105255,9.071,1.6,7.471,Reducing power from 9.071 W to approximately 1.600 W would move this reading toward the normal region of the anomaly detector.
+1790105263,4.565,2.5,2.065,Reducing power from 4.565 W to approximately 2.500 W would move this reading toward the normal region of the anomaly detector.
