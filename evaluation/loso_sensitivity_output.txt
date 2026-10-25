@@ -1,0 +1,98 @@
+=== Label counts per session ===
+label        IE  NORMAL   OC  UP
+session_id                      
+0            27      22    0   0
+1           444     385    6   7
+2           845     277   64  30
+3           621     226  740  26
+4           500     163  539  30
+5           114      26   34   4
+6            19      85   12  10
+7             0     143  861  34
+8           291       2    0   0
+
+=== Leave-one-session-out (sessions >=100 rows held out; fixed 105 trees, no tuning) ===
+ held_out_session    n  accuracy  macro_f1
+                1  842    0.9964    0.9594
+                2 1216    1.0000    1.0000
+                3 1613    1.0000    1.0000
+                4 1232    0.9984    0.9909
+                5  178    0.9944    0.9685
+                6  126    0.9921    0.9772
+                7 1038    1.0000    0.7500
+                8  293    0.9966    0.4496
+
+Pooled out-of-session (n=6538): accuracy 0.9988, macro-F1 0.9949
+              precision    recall  f1-score   support
+
+      NORMAL     0.9977    1.0000    0.9989      1307
+          IE     1.0000    0.9989    0.9995      2834
+          OC     0.9991    0.9987    0.9989      2256
+          UP     0.9789    0.9858    0.9823       141
+
+    accuracy                         0.9988      6538
+   macro avg     0.9939    0.9959    0.9949      6538
+weighted avg     0.9988    0.9988    0.9988      6538
+
+Confusion (rows=true, cols=pred, order ['NORMAL', 'IE', 'OC', 'UP'] )
+[[1307    0    0    0]
+ [   3 2831    0    0]
+ [   0    0 2253    3]
+ [   0    0    2  139]]
+
+=== How much do labels depend on the thresholds? (rule recomputed from logged readings) ===
+
+Overconsumption limit sweep (noise limit 0.02 A):
+ OC_limit_W  %OC  %IE  %anomalous  %agree_w_logged_labels
+       1.00 42.6 43.4        86.0                    92.9
+       1.25 38.7 43.4        82.1                    96.8
+       1.50 35.5 43.4        78.9                   100.0
+       2.00 28.8 43.4        72.2                    93.3
+       2.50 20.3 43.4        63.8                    84.8
+       3.00 14.9 43.4        58.4                    79.4
+       5.00 10.7 43.4        54.1                    75.2
+
+Current noise-limit sweep (OC limit 1.5 W):
+ noise_A  %IE  %anomalous  %agree_w_logged_labels
+   0.005 43.4        78.9                   100.0
+   0.010 43.4        78.9                   100.0
+   0.020 43.4        78.9                   100.0
+   0.050 43.1        78.6                    99.7
+   0.100 42.4        77.9                    99.0
+   0.200 40.8        76.3                    97.3
+
+Occupied rows with power within +/-20% of the 1.5 W limit: 531 of 3715 (14.3%)
+Absent rows with current between 0.02 and 0.05 A: 23
+
+Unusual-pattern (UP) rule sweep: count of occupied non-IE rows flagged
+ std_mult  min_W  n_UP  %of_occupied
+      2.0    0.5   361          9.72
+      2.0    1.0   345          9.29
+      2.0    2.0   224          6.03
+      3.0    0.5   143          3.85
+      3.0    1.0   141          3.80
+      3.0    2.0   109          2.93
+      4.0    0.5    87          2.34
+      4.0    1.0    85          2.29
+      4.0    2.0    76          2.05
+      5.0    0.5    67          1.80
+      5.0    1.0    66          1.78
+      5.0    2.0    59          1.59
+
+=== Does the model beat a 3-rule decision list? (agreement with labels, in-sample) ===
+firmware-rule vs make_labels agreement: 0.9786; disagreement is exactly the UP rows: True
+UP rows: 141 (2.14% of all readings)
+
+Presence-only check: P(label=IE | absent & load) and P(label in OC/NORMAL/UP | present):
+label              IE  NORMAL    OC   UP
+presence_binary                         
+0                2861      11     0    0
+1                   0    1318  2256  141
+
+Power stats by label (W):
+         count   mean    std    min    25%    50%     75%     max
+label                                                            
+IE      2861.0  8.553  4.941  0.104  6.404  9.706  10.742  31.573
+NORMAL  1329.0  0.745  0.427  0.000  0.404  0.730   1.109   1.499
+OC      2256.0  4.510  3.889  1.501  2.136  2.654   6.109  22.910
+UP       141.0  3.586  4.623  0.000  1.055  1.817   4.493  26.792
