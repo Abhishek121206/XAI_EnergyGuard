@@ -945,6 +945,131 @@ tbody tr:hover {
 
 
 /* =====================================================
+   CLASS CHIPS
+===================================================== */
+
+.class-chips {
+
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    margin-bottom: 20px;
+}
+
+
+.chip {
+
+    padding: 10px 16px;
+
+    border: 1px solid var(--border);
+    border-radius: 999px;
+
+    background: var(--panel);
+
+    color: var(--soft);
+    font-size: 13px;
+}
+
+
+.chip strong {
+
+    margin-right: 6px;
+
+    color: var(--text);
+}
+
+
+.chip.danger strong {
+    color: var(--danger);
+}
+
+
+.chip.success strong {
+    color: var(--success);
+}
+
+
+/* =====================================================
+   MODEL PAGE
+===================================================== */
+
+.bar-row {
+
+    display: grid;
+    grid-template-columns: 180px 1fr 56px;
+    align-items: center;
+    gap: 12px;
+
+    margin-bottom: 12px;
+
+    font-size: 13px;
+}
+
+
+.bar-label {
+
+    overflow: hidden;
+
+    color: var(--soft);
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.bar-track {
+
+    height: 8px;
+
+    border-radius: 999px;
+
+    background: var(--border);
+}
+
+
+.bar-fill {
+
+    height: 100%;
+
+    border-radius: 999px;
+
+    background: var(--text);
+}
+
+
+.bar-value {
+
+    color: var(--muted);
+
+    text-align: right;
+}
+
+
+.metric-note {
+
+    margin-top: 10px;
+
+    color: var(--soft);
+
+    line-height: 1.6;
+}
+
+
+.explanation-time {
+
+    display: block;
+
+    margin-top: 4px;
+
+    color: var(--muted);
+
+    font-size: 12px;
+    font-weight: 400;
+}
+
+
+/* =====================================================
    RESPONSIVE
 ===================================================== */
 
@@ -1030,5 +1155,10 @@ tbody tr:hover {
     .header-right {
 
         width: 100%;
+    }
+
+    .bar-row {
+
+        grid-template-columns: 120px 1fr 48px;
     }
 }

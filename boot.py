@@ -1,8 +1,8 @@
 import network
 import time
 
-SSID = "ISHANT"
-PASSWORD = "123456789"
+from device_config import WIFI_SSID as SSID
+from device_config import WIFI_PASSWORD as PASSWORD
 
 wifi = network.WLAN(network.STA_IF)
 wifi.active(True)

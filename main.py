@@ -9,7 +9,7 @@ from umqtt.simple import MQTTClient
 # MQTT CONFIGURATION
 # =====================================================
 
-MQTT_BROKER = "192.168.137.1"
+from device_config import MQTT_BROKER
 MQTT_PORT = 1883
 
 MQTT_CLIENT_ID = "esp32_energyguard"

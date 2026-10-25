@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# Trained model (rebuild with: python backend/train.py)
+backend/models/
+
+# Pipeline outputs (rebuild with: python backend/pipeline_runner.py)
+# Raw sensor data (backend/data/c1.csv etc.) IS committed.
+backend/data/*_features.csv
+backend/data/*_classified.csv
+backend/data/*_shap.csv
+backend/data/*_counterfactuals.csv
+backend/data/*_explanations.csv
+backend/data/*_anomalies.csv
+backend/data/latest_prediction.json
+backend/data/*.tmp
+
+# ESP32 credentials (copy device_config_example.py)
+device_config.py

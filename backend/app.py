@@ -1,7 +1,16 @@
-from flask import Flask, jsonify
-from flask_cors import CORS
-from pathlib import Path
+the websiteimport json
+
 import pandas as pd
+from flask import Flask, Response, jsonify, request
+from flask_cors import CORS
+
+from ml_config import (
+    CLASSES,
+    CLASSIFIED_FILE,
+    EXPLANATIONS_FILE,
+    LATEST_PREDICTION_FILE,
+    METRICS_FILE
+)
 
 
 # =====================================================
@@ -9,28 +18,78 @@ import pandas as pd
 # =====================================================
 
 app = Flask(__name__)
-CORS(app)
+
+# Only the local dashboard may call the API
+CORS(app, origins=[
+    "http://127.0.0.1:5500",
+    "http://localhost:5500"
+])
+
+DEFAULT_LIMITS = {
+    "data": 500,
+    "anomalies": 200,
+    "explanations": 50
+}
+
 
 # =====================================================
-# PATHS
-# =====================================================
-
-BASE_DIR = Path(__file__).resolve().parent
-DATA_DIR = BASE_DIR / "data"
-
-CLASSIFIED_FILE = DATA_DIR / "c1_classified.csv"
-EXPLANATIONS_FILE = DATA_DIR / "c1_explanations.csv"
-
-
-# =====================================================
-# HELPER
+# HELPERS
 # =====================================================
 
 def load_csv(file_path):
+
     if not file_path.exists():
         return None
 
     return pd.read_csv(file_path)
+
+
+def load_json(file_path):
+
+    if not file_path.exists():
+        return None
+
+    return json.loads(file_path.read_text())
+
+
+def records(df):
+
+    # pandas writes NaN as null (jsonify would emit invalid NaN)
+    return Response(
+        df.to_json(orient="records"),
+        mimetype="application/json"
+    )
+
+
+def limit_param(name):
+
+    """?limit=N (most recent N rows); ?limit=0 returns all."""
+
+    limit = request.args.get(
+        "limit",
+        default=DEFAULT_LIMITS[name],
+        type=int
+    )
+
+    return max(limit, 0)
+
+
+def tail(df, limit):
+
+    return df if limit == 0 else df.tail(limit)
+
+
+def not_found(what):
+
+    return jsonify({
+        "error": f"{what} not found. "
+                 "Run train.py and pipeline_runner.py."
+    }), 404
+
+
+def waste_events(df):
+
+    return df[df["waste_type"] != "NORMAL"]
 
 
 # =====================================================
@@ -46,7 +105,7 @@ def home():
 
 
 # =====================================================
-# ALL CLASSIFIED DATA
+# CLASSIFIED DATA
 # =====================================================
 
 @app.route("/api/data", methods=["GET"])
@@ -55,17 +114,13 @@ def get_data():
     df = load_csv(CLASSIFIED_FILE)
 
     if df is None:
-        return jsonify({
-            "error": "Classified data file not found"
-        }), 404
+        return not_found("Classified data")
 
-    return jsonify(
-        df.to_dict(orient="records")
-    )
+    return records(tail(df, limit_param("data")))
 
 
 # =====================================================
-# ANOMALIES ONLY
+# WASTE EVENTS
 # =====================================================
 
 @app.route("/api/anomalies", methods=["GET"])
@@ -74,18 +129,31 @@ def get_anomalies():
     df = load_csv(CLASSIFIED_FILE)
 
     if df is None:
+        return not_found("Classified data")
+
+    return records(
+        tail(waste_events(df), limit_param("anomalies"))
+    )
+
+
+@app.route("/api/anomalies/latest", methods=["GET"])
+def get_latest_anomaly():
+
+    df = load_csv(CLASSIFIED_FILE)
+
+    if df is None:
+        return not_found("Classified data")
+
+    anomalies = waste_events(df)
+
+    if anomalies.empty:
         return jsonify({
-            "error": "Classified data file not found"
-        }), 404
+            "message": "No anomalies found"
+        })
 
-    anomalies = df[
-        df["anomaly"] == "ANOMALY"
-    ]
-
-    return jsonify(
-        anomalies.to_dict(
-            orient="records"
-        )
+    return Response(
+        anomalies.iloc[-1].to_json(),
+        mimetype="application/json"
     )
 
 
@@ -99,45 +167,72 @@ def get_explanations():
     df = load_csv(EXPLANATIONS_FILE)
 
     if df is None:
-        return jsonify({
-            "error": "Explanation file not found"
-        }), 404
+        return not_found("Explanations")
 
-    return jsonify(
-        df.to_dict(
-            orient="records"
-        )
-    )
+    return records(tail(df, limit_param("explanations")))
 
 
 # =====================================================
-# LATEST ANOMALY
+# SUMMARY
 # =====================================================
 
-@app.route("/api/anomalies/latest", methods=["GET"])
-def get_latest_anomaly():
+@app.route("/api/summary", methods=["GET"])
+def get_summary():
 
     df = load_csv(CLASSIFIED_FILE)
 
     if df is None:
+        return not_found("Classified data")
+
+    counts = df["waste_type"].value_counts()
+
+    metrics = load_json(METRICS_FILE) or {}
+
+    return jsonify({
+        "total_readings": int(len(df)),
+        "class_counts": {
+            label: int(counts.get(label, 0))
+            for label in CLASSES
+        },
+        "anomaly_count": int(len(waste_events(df))),
+        "outlier_count": int(df.get("is_outlier", pd.Series()).sum()),
+        "first_timestamp": int(df["timestamp"].min()),
+        "latest_timestamp": int(df["timestamp"].max()),
+        "model_version": metrics.get("trained_at")
+    })
+
+
+# =====================================================
+# MODEL METRICS
+# =====================================================
+
+@app.route("/api/model/metrics", methods=["GET"])
+def get_model_metrics():
+
+    metrics = load_json(METRICS_FILE)
+
+    if metrics is None:
+        return not_found("Model metrics")
+
+    return jsonify(metrics)
+
+
+# =====================================================
+# LIVE PREDICTION (written by data_collector.py)
+# =====================================================
+
+@app.route("/api/live", methods=["GET"])
+def get_live():
+
+    prediction = load_json(LATEST_PREDICTION_FILE)
+
+    if prediction is None:
         return jsonify({
-            "error": "Classified data file not found"
+            "error": "No live prediction yet. "
+                     "Start data_collector.py with a trained model."
         }), 404
 
-    anomalies = df[
-        df["anomaly"] == "ANOMALY"
-    ]
-
-    if anomalies.empty:
-        return jsonify({
-            "message": "No anomalies found"
-        })
-
-    latest = anomalies.iloc[-1]
-
-    return jsonify(
-        latest.to_dict()
-    )
+    return jsonify(prediction)
 
 
 # =====================================================
@@ -149,7 +244,9 @@ def health():
 
     return jsonify({
         "status": "healthy",
-        "service": "XAI-EnergyGuard"
+        "service": "XAI-EnergyGuard",
+        "model_trained": METRICS_FILE.exists(),
+        "pipeline_output": CLASSIFIED_FILE.exists()
     })
 
 

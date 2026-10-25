@@ -1,41 +1,16 @@
-import pickle
-from pathlib import Path
-
+import numpy as np
 import pandas as pd
 import shap
 
-
-# =====================================================
-# PATHS
-# =====================================================
-
-BASE_DIR = Path(__file__).resolve().parent
-
-INPUT_FILE = BASE_DIR / "data" / "c1_classified.csv"
-MODEL_FILE = BASE_DIR / "data" / "xgboost_model.pkl"
-ENCODER_FILE = BASE_DIR / "data" / "label_encoder.pkl"
-
-OUTPUT_FILE = BASE_DIR / "data" / "c1_shap.csv"
+from ml_config import (
+    CLASSIFIED_FILE,
+    MAX_EXPLAIN_ROWS,
+    SHAP_FILE
+)
+from predict import Predictor
 
 
-# =====================================================
-# FEATURES
-# =====================================================
-
-FEATURE_COLUMNS = [
-    "power_W",
-    "current_A",
-    "voltage_V",
-    "temperature_C",
-    "humidity_percent",
-    "presence_binary",
-    "hour",
-    "day_type",
-    "rolling_mean_power",
-    "rolling_std_power",
-    "baseline_power",
-    "deviation_from_baseline"
-]
+TOP_N = 3
 
 
 # =====================================================
@@ -48,207 +23,162 @@ print("======================================")
 
 print("Loading classified data...")
 
-df = pd.read_csv(INPUT_FILE)
+df = pd.read_csv(CLASSIFIED_FILE)
 
 print("Total rows:", len(df))
 
 
 # =====================================================
-# SELECT ANOMALIES ONLY
+# SELECT WASTE EVENTS (most recent first)
 # =====================================================
 
-anomalies = df[
-    df["anomaly"] == "ANOMALY"
-].copy()
+anomalies = (
+    df[df["waste_type"] != "NORMAL"]
+    .tail(MAX_EXPLAIN_ROWS)
+    .copy()
+)
 
-print("Anomalies:", len(anomalies))
-
-
-if len(anomalies) == 0:
-
-    print("No anomalies found.")
-    print("Nothing to explain.")
-    raise SystemExit
+print("Waste events to explain:", len(anomalies))
 
 
 # =====================================================
 # LOAD MODEL
 # =====================================================
 
-print()
-print("Loading XGBoost model...")
+predictor = Predictor()
 
-with open(MODEL_FILE, "rb") as file:
-
-    model = pickle.load(file)
-
-
-with open(ENCODER_FILE, "rb") as file:
-
-    label_encoder = pickle.load(file)
-
-
-print("Model loaded.")
+print("Model version:", predictor.version)
 
 
 # =====================================================
-# PREPARE INPUT
+# REUSE CACHED EXPLANATIONS
 # =====================================================
 
-X = anomalies[
-    FEATURE_COLUMNS
-].copy()
+# SHAP for a row only changes if the model or the
+# predicted class changes.
 
-X = X.fillna(0)
+cached = pd.DataFrame()
+
+if SHAP_FILE.exists():
+
+    previous = pd.read_csv(SHAP_FILE)
+
+    if {"model_version", "reading_id"} <= set(previous.columns):
+
+        cached = previous[
+            previous["model_version"] == predictor.version
+        ].merge(
+            anomalies[["reading_id", "waste_type"]],
+            on=["reading_id", "waste_type"]
+        )
+
+to_explain = anomalies[
+    ~anomalies["reading_id"].isin(
+        cached.get("reading_id", [])
+    )
+]
+
+print("Cached:", len(cached), " New:", len(to_explain))
 
 
 # =====================================================
-# SHAP EXPLAINER
+# SHAP
 # =====================================================
 
-print()
-print("Creating SHAP TreeExplainer...")
+def get_class_shap_values(shap_output, class_indices):
 
-explainer = shap.TreeExplainer(model)
+    """Per-row SHAP values for each row's predicted class."""
 
-shap_values = explainer.shap_values(X)
+    rows = np.arange(len(class_indices))
 
-print("SHAP values calculated.")
-
-
-# =====================================================
-# HANDLE SHAP OUTPUT FORMAT
-# =====================================================
-
-def get_class_shap_values(
-    shap_output,
-    sample_index,
-    class_index
-):
-
-    # Older SHAP format:
-    # list of arrays
+    # Older SHAP format: list of (samples, features)
     if isinstance(shap_output, list):
 
-        return shap_output[class_index][sample_index]
+        stacked = np.stack(shap_output, axis=-1)
 
-    # Newer SHAP format:
-    # (samples, features, classes)
-    if len(shap_output.shape) == 3:
+        return stacked[rows, :, class_indices]
 
-        return shap_output[
-            sample_index,
-            :,
-            class_index
-        ]
+    # Newer SHAP format: (samples, features, classes)
+    if shap_output.ndim == 3:
+
+        return shap_output[rows, :, class_indices]
 
     # Single-output fallback
-    return shap_output[sample_index]
+    return shap_output
 
-
-# =====================================================
-# CREATE EXPLANATIONS
-# =====================================================
 
 results = []
 
+if len(to_explain) > 0:
 
-for sample_index in range(len(X)):
+    X = predictor.model_input(to_explain)
 
-    predicted_label = anomalies.iloc[
-        sample_index
-    ]["waste_type"]
+    print()
+    print("Creating SHAP TreeExplainer...")
 
-    class_index = label_encoder.transform(
-        [predicted_label]
-    )[0]
+    explainer = shap.TreeExplainer(predictor.classifier)
+
+    shap_values = explainer.shap_values(X)
+
+    class_indices = np.array([
+        list(predictor.classes).index(label)
+        for label in to_explain["waste_type"]
+    ])
 
     values = get_class_shap_values(
         shap_values,
-        sample_index,
-        class_index
+        class_indices
     )
 
+    print("SHAP values calculated.")
 
-    # -------------------------------------------------
-    # PAIR FEATURES WITH SHAP VALUES
-    # -------------------------------------------------
-
-    feature_importance = []
-
-    for feature, value in zip(
-        FEATURE_COLUMNS,
-        values
+    for row_index, (_, row) in enumerate(
+        to_explain.iterrows()
     ):
 
-        feature_importance.append(
-            (
-                feature,
-                float(value)
+        # Sort features by absolute SHAP value
+
+        order = np.argsort(
+            -np.abs(values[row_index])
+        )[:TOP_N]
+
+        result = {
+            "reading_id": row["reading_id"],
+            "timestamp": row["timestamp"],
+            "waste_type": row["waste_type"],
+            "waste_confidence": row["waste_confidence"],
+            "model_version": predictor.version
+        }
+
+        for rank, feature_index in enumerate(order, start=1):
+
+            feature = predictor.features[feature_index]
+
+            result[f"top{rank}_feature"] = feature
+            result[f"top{rank}_value"] = round(
+                float(row[feature]), 4
             )
-        )
+            result[f"top{rank}_shap"] = round(
+                float(values[row_index][feature_index]), 6
+            )
 
-
-    # -------------------------------------------------
-    # SORT BY ABSOLUTE SHAP VALUE
-    # -------------------------------------------------
-
-    feature_importance.sort(
-        key=lambda item: abs(item[1]),
-        reverse=True
-    )
-
-
-    # -------------------------------------------------
-    # TOP 3 FEATURES
-    # -------------------------------------------------
-
-    top_features = feature_importance[:3]
-
-
-    row = {
-
-        "timestamp":
-            anomalies.iloc[sample_index]["timestamp"],
-
-        "waste_type":
-            predicted_label,
-
-        "waste_confidence":
-            anomalies.iloc[sample_index][
-                "waste_confidence"
-            ],
-
-        "top1_feature":
-            top_features[0][0],
-
-        "top1_shap":
-            round(top_features[0][1], 6),
-
-        "top2_feature":
-            top_features[1][0],
-
-        "top2_shap":
-            round(top_features[1][1], 6),
-
-        "top3_feature":
-            top_features[2][0],
-
-        "top3_shap":
-            round(top_features[2][1], 6)
-    }
-
-    results.append(row)
+        results.append(result)
 
 
 # =====================================================
 # SAVE
 # =====================================================
 
-shap_df = pd.DataFrame(results)
+shap_df = (
+    pd.concat(
+        [cached, pd.DataFrame(results)],
+        ignore_index=True
+    )
+    .sort_values("timestamp", kind="stable")
+)
 
 shap_df.to_csv(
-    OUTPUT_FILE,
+    SHAP_FILE,
     index=False
 )
 
@@ -258,14 +188,26 @@ shap_df.to_csv(
 # =====================================================
 
 print()
-print("SHAP explanations:")
+print("Most common top feature per class:")
+
+if not shap_df.empty:
+
+    print(
+        shap_df
+        .groupby("waste_type")["top1_feature"]
+        .agg(lambda s: s.value_counts().index[0])
+        .to_string()
+    )
+
+print()
+print("Latest explanations:")
 
 print(
-    shap_df.to_string(index=False)
+    shap_df.tail(5).to_string(index=False)
 )
 
 print()
-print("Output:", OUTPUT_FILE)
+print("Output:", SHAP_FILE)
 
 print()
 print("======================================")

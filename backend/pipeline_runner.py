@@ -16,12 +16,13 @@ BASE_DIR = Path(__file__).resolve().parent
 
 PIPELINE = [
     "feature_engineer.py",
-    "anomaly_detector.py",
-    "waste_classifier.py",
+    "predict.py",
     "xai_module.py",
     "dice_module.py",
     "nlg_module.py"
 ]
+
+MODEL_BUNDLE_FILE = BASE_DIR / "models" / "model_bundle.joblib"
 
 
 # =====================================================
@@ -68,6 +69,14 @@ def run_module(filename):
 print("======================================")
 print("XAI-EnergyGuard PIPELINE RUNNER")
 print("======================================")
+
+if not MODEL_BUNDLE_FILE.exists():
+
+    print()
+    print("No trained model found:", MODEL_BUNDLE_FILE)
+    print("Train it first:  python train.py")
+
+    raise SystemExit(1)
 
 for module in PIPELINE:
 

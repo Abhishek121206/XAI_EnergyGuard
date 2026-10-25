@@ -70,6 +70,28 @@ function statusClass(status) {
 
 
 // =====================================================
+// MODEL CLASSES
+// =====================================================
+
+const CLASS_LABELS = {
+    NORMAL: "Normal",
+    IE: "Idle equipment",
+    OC: "Overconsumption",
+    UP: "Unusual pattern"
+};
+
+function classLabel(code) {
+
+    return CLASS_LABELS[code] ?? code ?? "--";
+}
+
+function percent(value) {
+
+    return `${(Number(value ?? 0) * 100).toFixed(1)}%`;
+}
+
+
+// =====================================================
 // LOAD HEALTH
 // =====================================================
 
@@ -100,25 +122,60 @@ async function loadHealth() {
 // LOAD ALL DATA
 // =====================================================
 
+async function loadLivePrediction() {
+
+    // Written per MQTT message by data_collector.py;
+    // missing when the collector or model isn't running.
+
+    try {
+
+        return await fetchJSON("/api/live");
+
+    } catch (error) {
+
+        return null;
+    }
+}
+
+
 async function loadData() {
 
     const data = await fetchJSON(
-        "/api/data"
+        "/api/data?limit=10"
     );
 
     if (!Array.isArray(data) || data.length === 0) {
-
-        $("totalReadings").textContent = "0";
 
         return;
     }
 
 
     // -------------------------------------------------
-    // LATEST READING
+    // LATEST READING (live prediction if newer)
     // -------------------------------------------------
 
-    const latest = data[data.length - 1];
+    const live = await loadLivePrediction();
+
+    const latestBatch = data[data.length - 1];
+
+    const latest =
+        live && live.timestamp >= latestBatch.timestamp
+            ? live
+            : latestBatch;
+
+
+    $("currentPrediction").textContent =
+        classLabel(latest.waste_type);
+
+    $("currentPrediction").className =
+        `status-text ${statusClass(
+            latest.waste_type
+        )}`;
+
+    $("currentPredictionConfidence").textContent =
+        latest.waste_confidence === undefined
+            ? ""
+            : percent(latest.waste_confidence);
 
 
     $("currentPower").textContent =
@@ -135,10 +192,6 @@ async function loadData() {
         latest.presence_binary === 1
             ? "Detected"
             : "No presence";
-
-
-    $("totalReadings").textContent =
-        data.length;
 
 
     $("temperature").textContent =
@@ -238,10 +291,52 @@ async function loadData() {
                     ${row.status ?? "--"}
                 </span>
             </td>
+
+            <td>
+                <span class="table-status ${statusClass(
+                    row.waste_type
+                )}">
+                    ${row.waste_type ?? "--"}
+                </span>
+            </td>
         `;
 
         table.appendChild(tr);
     });
+}
+
+
+// =====================================================
+// LOAD SUMMARY
+// =====================================================
+
+async function loadSummary() {
+
+    const summary = await fetchJSON(
+        "/api/summary"
+    );
+
+    $("totalReadings").textContent =
+        summary.total_readings;
+
+    $("anomalyCount").textContent =
+        summary.anomaly_count;
+
+    $("anomalyDetail").textContent =
+        `waste events (${(
+            100 * summary.anomaly_count /
+            Math.max(summary.total_readings, 1)
+        ).toFixed(0)}% of readings)`;
+
+    $("classChips").innerHTML =
+        Object.entries(summary.class_counts)
+            .map(([code, count]) => `
+                <div class="chip ${statusClass(code)}">
+                    <strong>${count}</strong>
+                    ${code} · ${classLabel(code)}
+                </div>
+            `)
+            .join("");
 }
 
 
@@ -252,12 +347,8 @@ async function loadData() {
 async function loadAnomalies() {
 
     const anomalies = await fetchJSON(
-        "/api/anomalies"
+        "/api/anomalies?limit=200"
     );
-
-
-    $("anomalyCount").textContent =
-        anomalies.length;
 
 
     const table = $("anomaliesTable");
@@ -343,7 +434,7 @@ async function loadAnomalies() {
         <div class="alert-event">
 
             <div class="alert-type">
-                ${latest.waste_type ?? "ANOMALY"}
+                ${classLabel(latest.waste_type)}
             </div>
 
             <div class="alert-power">
@@ -388,7 +479,7 @@ async function loadExplanations() {
 
     const explanations =
         await fetchJSON(
-            "/api/explanations"
+            "/api/explanations?limit=20"
         );
 
 
@@ -440,7 +531,10 @@ async function loadExplanations() {
             </div>
 
             <h4>
-                ${item.waste_type}
+                ${classLabel(item.waste_type)}
+                <small class="explanation-time">
+                    ${formatTimestamp(item.timestamp)}
+                </small>
             </h4>
 
             <p class="explanation-text">
@@ -478,6 +572,19 @@ async function loadExplanations() {
 
             <p class="explanation-text">
                 ${item.administrator}
+            </p>
+
+
+            <div
+                class="explanation-role"
+                style="margin-top: 24px;"
+            >
+                COUNTERFACTUAL
+                (${item.counterfactual_method ?? "--"})
+            </div>
+
+            <p class="explanation-text">
+                ${item.counterfactual ?? "--"}
             </p>
 
         `;
@@ -580,10 +687,135 @@ function setupNavigation() {
 
                     pageTitle.textContent =
                         "AI Explanations";
+
+                } else if (
+                    sectionId ===
+                    "model"
+                ) {
+
+                    pageTitle.textContent =
+                        "Model Performance";
                 }
             }
         );
     });
+}
+
+
+// =====================================================
+// LOAD MODEL METRICS
+// =====================================================
+
+async function loadModel() {
+
+    let metrics;
+
+    try {
+
+        metrics = await fetchJSON(
+            "/api/model/metrics"
+        );
+
+    } catch (error) {
+
+        $("modelInfo").textContent =
+            "No trained model. Run python train.py.";
+
+        return;
+    }
+
+    const test = metrics.test;
+    const splits = metrics.splits;
+
+    $("modelInfo").textContent =
+        `Trained ${new Date(
+            metrics.trained_at
+        ).toLocaleString()} on ${metrics.rows} real readings ` +
+        `from ${metrics.data_file}. Tested on the most recent ` +
+        `${splits.test.rows} readings ` +
+        `(${new Date(splits.test.start).toLocaleDateString()} – ` +
+        `${new Date(splits.test.end).toLocaleDateString()}), ` +
+        `which the model never saw while training.`;
+
+
+    // -------------------------------------------------
+    // SCORE CARDS
+    // -------------------------------------------------
+
+    const scores = [
+        ["XGBOOST MACRO F1", test.xgboost.macro_f1, "selected model"],
+        ["XGBOOST ACCURACY", test.xgboost.accuracy, "test set"],
+        ["FIRMWARE RULE F1", test.firmware_rule_baseline.macro_f1, "baseline (no UP)"],
+        ["LOGISTIC REG. F1", test.logistic_regression.macro_f1, "baseline"]
+    ];
+
+    $("modelScores").innerHTML = scores
+        .map(([label, value, sub]) => `
+            <div class="stat-card">
+                <div class="stat-label">${label}</div>
+                <div class="stat-value">
+                    ${Number(value).toFixed(3)}
+                </div>
+                <div class="stat-sub">${sub}</div>
+            </div>
+        `)
+        .join("");
+
+
+    // -------------------------------------------------
+    // PER-CLASS TABLE
+    // -------------------------------------------------
+
+    $("perClassTable").innerHTML = Object.entries(
+        test.xgboost.per_class
+    )
+        .map(([code, values]) => `
+            <tr>
+                <td>${code} · ${classLabel(code)}</td>
+                <td>${values.precision.toFixed(3)}</td>
+                <td>${values.recall.toFixed(3)}</td>
+                <td>${values.f1.toFixed(3)}</td>
+                <td>${values.support}</td>
+            </tr>
+        `)
+        .join("");
+
+
+    // -------------------------------------------------
+    // FEATURE IMPORTANCE BARS
+    // -------------------------------------------------
+
+    const importance = Object.entries(
+        metrics.feature_importance
+    );
+
+    const maxImportance = Math.max(
+        ...importance.map(([, value]) => value),
+        1e-9
+    );
+
+    $("featureImportance").innerHTML = importance
+        .map(([feature, value]) => `
+            <div class="bar-row">
+                <span class="bar-label">${feature}</span>
+                <div class="bar-track">
+                    <div
+                        class="bar-fill"
+                        style="width: ${(
+                            100 * value / maxImportance
+                        ).toFixed(1)}%"
+                    ></div>
+                </div>
+                <span class="bar-value">
+                    ${value.toFixed(3)}
+                </span>
+            </div>
+        `)
+        .join("");
+
+
+    $("labelNote").textContent =
+        metrics.label_note;
 }
 
 
@@ -596,6 +828,8 @@ async function loadDashboard() {
     await loadHealth();
 
     try {
+
+        await loadSummary();
 
         await loadData();
 
@@ -620,6 +854,9 @@ async function loadDashboard() {
 setupNavigation();
 
 loadDashboard();
+
+// Metrics only change when train.py is re-run
+loadModel();
 
 
 // Refresh data every 5 seconds

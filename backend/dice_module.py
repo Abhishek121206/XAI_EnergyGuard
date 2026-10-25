@@ -1,622 +1,518 @@
+import warnings
+
 import numpy as np
 import pandas as pd
-import dice_ml
 
-from pathlib import Path
-from sklearn.base import BaseEstimator, ClassifierMixin
-from sklearn.ensemble import IsolationForest
+from ml_config import (
+    CLASSIFIED_FILE,
+    COUNTERFACTUAL_FILE,
+    LOAD_VOLTAGE,
+    MAX_DICE_ROWS,
+    MAX_EXPLAIN_ROWS,
+    MODEL_FEATURES,
+    OVERCONSUMPTION_LIMIT_W,
+    ROLLING_WINDOW,
+    SPIKE_MIN_W,
+    SPIKE_STD_MULTIPLIER
+)
+from predict import Predictor
+
+try:
+    import dice_ml
+except ImportError:
+    dice_ml = None
 
 
 # =====================================================
-# PATHS
+# SETTINGS
 # =====================================================
 
-BASE_DIR = Path(__file__).resolve().parent
+# Candidate power values tried per reading by the model search
+GRID_POINTS = 150
 
-FEATURE_FILE = BASE_DIR / "data" / "c1_features.csv"
-ANOMALY_FILE = BASE_DIR / "data" / "c1_anomalies.csv"
+# Recent history (previous window) and presence are held
+# fixed; only the power of the current reading is varied.
 
-OUTPUT_FILE = BASE_DIR / "data" / "c1_counterfactuals.csv"
-
-
-# =====================================================
-# FEATURES
-# =====================================================
-
-MODEL_FEATURES = [
+CONTEXT_COLUMNS = [
     "power_W",
-    "current_A",
-    "temperature_C",
-    "humidity_percent",
     "presence_binary",
-    "rolling_mean_power",
+    "prev_mean_power",
+    "prev_rolling_std_power",
     "rolling_std_power",
-    "baseline_power",
-    "deviation_from_baseline",
-    "hour",
-    "day_type"
+    "baseline_power"
 ]
 
-
-# =====================================================
-# LOAD FEATURE DATA
-# =====================================================
 
 print("======================================")
-print("XAI-EnergyGuard DiCE")
+print("XAI-EnergyGuard COUNTERFACTUALS (DiCE)")
 print("======================================")
 
-print("Loading feature data...")
 
-features_df = pd.read_csv(FEATURE_FILE)
+# =====================================================
+# CONTEXT <-> MODEL FEATURES
+# =====================================================
 
-print("Rows:", len(features_df))
+def to_context(features_df):
+
+    context = pd.DataFrame(index=features_df.index)
+
+    context["power_W"] = features_df["power_W"]
+    context["presence_binary"] = features_df["presence_binary"]
+    context["prev_mean_power"] = (
+        features_df["power_W"] - features_df["power_jump"]
+    )
+    context["prev_rolling_std_power"] = (
+        features_df["prev_rolling_std_power"]
+    )
+    context["rolling_std_power"] = features_df["rolling_std_power"]
+    context["baseline_power"] = features_df["baseline_power"]
+
+    return context[CONTEXT_COLUMNS].astype(float)
+
+
+def context_to_features(context):
+
+    """Recompute every power-derived feature for a new power_W."""
+
+    power = context["power_W"]
+    previous_mean = context["prev_mean_power"]
+
+    features = pd.DataFrame(index=context.index)
+
+    features["power_W"] = power
+    features["current_A"] = power / LOAD_VOLTAGE
+    features["presence_binary"] = context["presence_binary"]
+    features["rolling_mean_power"] = (
+        previous_mean
+        + (power - previous_mean) / ROLLING_WINDOW
+    )
+    features["rolling_std_power"] = context["rolling_std_power"]
+    features["prev_rolling_std_power"] = (
+        context["prev_rolling_std_power"]
+    )
+    features["power_jump"] = power - previous_mean
+    features["power_jump_score"] = (
+        features["power_jump"].abs()
+        / context["prev_rolling_std_power"].clip(
+            lower=SPIKE_MIN_W / SPIKE_STD_MULTIPLIER
+        )
+    )
+    features["deviation_from_baseline"] = (
+        power - context["baseline_power"]
+    )
+
+    return features[MODEL_FEATURES]
 
 
 # =====================================================
-# PREPARE TRAINING DATA
+# "IS THIS READING NORMAL?" MODEL
 # =====================================================
 
-X_train = features_df[MODEL_FEATURES].copy()
+class NormalityModel:
 
-X_train = X_train.fillna(0)
+    """Binary view of the XGBoost classifier for DiCE.
+
+    1 = NORMAL, 0 = any waste class.
+    """
+
+    def __init__(self, predictor):
+
+        self.classifier = predictor.classifier
+        self.normal_index = list(predictor.classes).index("NORMAL")
+
+    def class_probabilities(self, context):
+
+        if not isinstance(context, pd.DataFrame):
+            context = pd.DataFrame(context, columns=CONTEXT_COLUMNS)
+
+        return self.classifier.predict_proba(
+            context_to_features(context[CONTEXT_COLUMNS])
+        )
+
+    def predict(self, context):
+
+        return (
+            self.class_probabilities(context).argmax(axis=1)
+            == self.normal_index
+        ).astype(int)
+
+    def predict_proba(self, context):
+
+        normal = self.class_probabilities(context)[
+            :, self.normal_index
+        ]
+
+        return np.column_stack([1.0 - normal, normal])
 
 
 # =====================================================
-# TRAIN ISOLATION FOREST
+# MODEL-BASED SEARCH
 # =====================================================
 
-print("Training Isolation Forest...")
+def power_upper_bound(context):
 
-isolation_forest = IsolationForest(
-    n_estimators=200,
-    contamination=0.05,
-    max_samples=min(256, len(X_train)),
-    random_state=42
-)
+    return (
+        context[["power_W", "prev_mean_power", "baseline_power"]]
+        .max(axis=1)
+        .clip(lower=2.0)
+        * 1.5
+    )
 
-isolation_forest.fit(X_train)
 
-print("Isolation Forest ready.")
+def search_counterfactual_power(model, context):
+
+    """Closest power_W (to the original) the model calls NORMAL.
+
+    Returns an array with NaN where no power value works.
+    """
+
+    n_rows = len(context)
+
+    candidates = (
+        np.linspace(0.0, 1.0, GRID_POINTS)[None, :]
+        * power_upper_bound(context).to_numpy()[:, None]
+    )
+
+    expanded = context.loc[
+        context.index.repeat(GRID_POINTS)
+    ].reset_index(drop=True)
+
+    expanded["power_W"] = candidates.ravel()
+
+    is_normal = model.predict(expanded).reshape(
+        n_rows, GRID_POINTS
+    ).astype(bool)
+
+    distance = np.abs(
+        candidates - context["power_W"].to_numpy()[:, None]
+    )
+
+    distance[~is_normal] = np.inf
+
+    best = distance.argmin(axis=1)
+
+    found = np.isfinite(distance[np.arange(n_rows), best])
+
+    return np.where(
+        found,
+        candidates[np.arange(n_rows), best],
+        np.nan
+    )
 
 
 # =====================================================
-# DiCE MODEL WRAPPER
+# DiCE
 # =====================================================
 
-class IsolationForestWrapper(
-    BaseEstimator,
-    ClassifierMixin
-):
+def build_dice_explainer(model, context_all, labels_all):
 
-    def __init__(self, model):
+    data = context_all.copy()
+    data["is_normal"] = (labels_all == "NORMAL").astype(int)
 
-        self.model = model
+    data_interface = dice_ml.Data(
+        dataframe=data,
+        continuous_features=CONTEXT_COLUMNS,
+        outcome_name="is_normal"
+    )
 
-    def _prepare_data(self, X):
+    model_interface = dice_ml.Model(
+        model=model,
+        backend="sklearn",
+        model_type="classifier"
+    )
 
-        if isinstance(X, pd.DataFrame):
+    return dice_ml.Dice(
+        data_interface,
+        model_interface,
+        method="random"
+    )
 
-            data = X.copy()
 
-        else:
+def dice_counterfactual_power(explainer, query):
 
-            data = pd.DataFrame(
-                X,
-                columns=MODEL_FEATURES
+    upper = float(power_upper_bound(query).iloc[0])
+
+    with warnings.catch_warnings():
+
+        warnings.simplefilter("ignore")
+
+        explanation = explainer.generate_counterfactuals(
+            query,
+            total_CFs=3,
+            desired_class=1,
+            features_to_vary=["power_W"],
+            permitted_range={"power_W": [0.0, upper]},
+            random_seed=42,
+            verbose=False
+        )
+
+    frame = explanation.cf_examples_list[0].final_cfs_df
+
+    if frame is None or frame.empty:
+        return np.nan
+
+    powers = frame["power_W"].astype(float)
+
+    original = float(query["power_W"].iloc[0])
+
+    # Closest counterfactual = smallest change
+    return float(
+        powers.iloc[(powers - original).abs().argmin()]
+    )
+
+
+# =====================================================
+# RULE FALLBACK
+# =====================================================
+
+def rule_counterfactual_power(waste_type, context_row):
+
+    """Used when neither DiCE nor the model search finds a
+    power level the model calls NORMAL (e.g. the recent
+    history alone keeps the reading unusual)."""
+
+    if waste_type == "IE":
+        return 0.0
+
+    if waste_type == "OC":
+        return min(
+            context_row["power_W"],
+            OVERCONSUMPTION_LIMIT_W - 0.01
+        )
+
+    # UP: back to the level before the sudden change
+    return context_row["prev_mean_power"]
+
+
+# =====================================================
+# MESSAGES
+# =====================================================
+
+def build_message(waste_type, original, counterfactual, method):
+
+    change = original - counterfactual
+
+    if method == "rule":
+
+        if waste_type == "IE":
+            return (
+                f"Equipment is drawing {original:.2f} W with "
+                "nobody present. Switching it off (0 W) removes "
+                "this idle waste."
             )
 
-        data = data[MODEL_FEATURES].copy()
-
-        data = data.fillna(0)
-
-        # Keep current derived values consistent
-        # when DiCE changes power_W.
-
-        data["current_A"] = (
-            data["power_W"] / 5.0
-        )
-
-        data["deviation_from_baseline"] = (
-            data["power_W"]
-            - data["baseline_power"]
-        )
-
-        return data
-
-    def predict(self, X):
-
-        data = self._prepare_data(X)
-
-        isolation_predictions = (
-            self.model.predict(data)
-        )
-
-        # Isolation Forest:
-        #
-        #  1  = normal
-        # -1  = anomaly
-        #
-        # DiCE:
-        #
-        #  0  = normal
-        #  1  = anomaly
-
-        return np.where(
-            isolation_predictions == -1,
-            1,
-            0
-        )
-
-    def predict_proba(self, X):
-
-        data = self._prepare_data(X)
-
-        scores = self.model.decision_function(data)
-
-        # Convert the Isolation Forest decision score
-        # into a probability-like anomaly value.
-
-        anomaly_probability = (
-            1.0
-            /
-            (
-                1.0
-                +
-                np.exp(
-                    np.clip(
-                        scores * 10,
-                        -50,
-                        50
-                    )
-                )
+        if waste_type == "OC":
+            return (
+                f"Keeping power below {OVERCONSUMPTION_LIMIT_W:.1f} W "
+                f"(-{change:.2f} W) and steady would end this "
+                "overconsumption."
             )
+
+        return (
+            f"Power changed suddenly to {original:.2f} W from a "
+            f"recent level of about {counterfactual:.2f} W. "
+            "Check what was switched on or off at this moment."
         )
 
-        normal_probability = (
-            1.0
-            - anomaly_probability
+    change = original - counterfactual
+
+    if counterfactual < 0.05:
+        return (
+            f"Switching the equipment off (from {original:.2f} W "
+            "to about 0 W) would make this reading normal."
         )
 
-        return np.column_stack(
-            [
-                normal_probability,
-                anomaly_probability
-            ]
+    if change >= 0:
+        return (
+            f"Reducing power from {original:.2f} W to about "
+            f"{counterfactual:.2f} W (-{change:.2f} W) would "
+            "make this reading normal."
         )
 
+    return (
+        f"Power returning to about {counterfactual:.2f} W "
+        f"(its recent level, +{-change:.2f} W) would make "
+        "this reading normal."
+    )
+
 
 # =====================================================
-# CREATE WRAPPER
+# MAIN
 # =====================================================
 
-wrapped_model = IsolationForestWrapper(
-    isolation_forest
+predictor = Predictor()
+
+model = NormalityModel(predictor)
+
+classified = pd.read_csv(CLASSIFIED_FILE)
+
+anomalies = (
+    classified[classified["waste_type"] != "NORMAL"]
+    .tail(MAX_EXPLAIN_ROWS)
+    .copy()
 )
 
+print("Waste events:", len(anomalies))
 
-# =====================================================
-# CREATE DiCE DATASET
-# =====================================================
+if anomalies.empty:
 
-dice_data = features_df[
-    MODEL_FEATURES
-].copy()
+    pd.DataFrame(
+        columns=[
+            "reading_id", "timestamp", "waste_type",
+            "original_power_W",
+            "counterfactual_power_W", "power_reduction_W",
+            "method", "if_present_class", "message"
+        ]
+    ).to_csv(COUNTERFACTUAL_FILE, index=False)
 
-dice_data = dice_data.fillna(0)
-
-dice_data["anomaly_class"] = (
-    wrapped_model.predict(dice_data)
-)
-
-
-# =====================================================
-# DiCE DATA INTERFACE
-# =====================================================
-
-continuous_features = [
-    "power_W",
-    "current_A",
-    "temperature_C",
-    "humidity_percent",
-    "rolling_mean_power",
-    "rolling_std_power",
-    "baseline_power",
-    "deviation_from_baseline",
-    "hour"
-]
-
-categorical_features = [
-    "presence_binary",
-    "day_type"
-]
-
-
-data_interface = dice_ml.Data(
-    dataframe=dice_data,
-    continuous_features=continuous_features,
-    categorical_features=categorical_features,
-    outcome_name="anomaly_class"
-)
-
-
-# =====================================================
-# DiCE MODEL INTERFACE
-# =====================================================
-
-dice_model = dice_ml.Model(
-    model=wrapped_model,
-    backend="sklearn",
-    model_type="classifier"
-)
-
-
-# =====================================================
-# CREATE DiCE EXPLAINER
-# =====================================================
-
-explainer = dice_ml.Dice(
-    data_interface,
-    dice_model,
-    method="random"
-)
-
-
-# =====================================================
-# LOAD DETECTED ANOMALIES
-# =====================================================
-
-anomaly_df = pd.read_csv(
-    ANOMALY_FILE
-)
-
-anomalies = anomaly_df[
-    anomaly_df["anomaly"] == "ANOMALY"
-].copy()
-
-print()
-print("Anomalies to explain:", len(anomalies))
-
-
-if len(anomalies) == 0:
-
-    print("No anomalies found.")
+    print("Nothing to explain.")
     raise SystemExit
 
 
-# =====================================================
-# GENERATE COUNTERFACTUALS
-# =====================================================
+context = to_context(anomalies)
 
-results = []
+# -------------------------------------------------
+# Model search for every event
+# -------------------------------------------------
 
-
-for _, anomaly in anomalies.iterrows():
-
-    timestamp = anomaly["timestamp"]
-
-    original_power = float(
-        anomaly["power_W"]
-    )
-
-    print()
-    print(
-        "Processing timestamp:",
-        timestamp
-    )
-
-    # -------------------------------------------------
-    # Build query
-    # -------------------------------------------------
-
-    query = pd.DataFrame(
-        [
-            {
-                feature:
-                    anomaly[feature]
-                for feature in MODEL_FEATURES
-            }
-        ]
-    )
-
-    query = query.fillna(0)
-
-    # -------------------------------------------------
-    # Generate counterfactuals
-    # -------------------------------------------------
-
-    try:
-
-        explanation = (
-            explainer.generate_counterfactuals(
-                query,
-                total_CFs=3,
-                desired_class=0,
-                features_to_vary=[
-                    "power_W"
-                ]
-            )
-        )
-
-        if (
-            explanation.cf_examples_list is None
-            or
-            len(explanation.cf_examples_list) == 0
-        ):
-
-            print("No counterfactual found.")
-
-            results.append(
-                {
-                    "timestamp":
-                        timestamp,
-
-                    "original_power_W":
-                        round(
-                            original_power,
-                            3
-                        ),
-
-                    "counterfactual_power_W":
-                        None,
-
-                    "power_reduction_W":
-                        None,
-
-                    "message":
-                        "No counterfactual found"
-                }
-            )
-
-            continue
-
-
-        cf_df = (
-            explanation
-            .cf_examples_list[0]
-            .final_cfs_df
-        )
-
-        if cf_df is None or len(cf_df) == 0:
-
-            print("No counterfactual found.")
-
-            results.append(
-                {
-                    "timestamp":
-                        timestamp,
-
-                    "original_power_W":
-                        round(
-                            original_power,
-                            3
-                        ),
-
-                    "counterfactual_power_W":
-                        None,
-
-                    "power_reduction_W":
-                        None,
-
-                    "message":
-                        "No counterfactual found"
-                }
-            )
-
-            continue
-
-
-        # -------------------------------------------------
-        # ONLY ACCEPT POWER REDUCTIONS
-        # -------------------------------------------------
-
-        valid_cf = cf_df[
-            cf_df["power_W"] < original_power
-        ].copy()
-
-
-        if len(valid_cf) == 0:
-
-            print(
-                "No valid power-reducing "
-                "counterfactual found."
-            )
-
-            results.append(
-                {
-                    "timestamp":
-                        timestamp,
-
-                    "original_power_W":
-                        round(
-                            original_power,
-                            3
-                        ),
-
-                    "counterfactual_power_W":
-                        None,
-
-                    "power_reduction_W":
-                        None,
-
-                    "message":
-                        "No valid power-reducing "
-                        "counterfactual found"
-                }
-            )
-
-            continue
-
-
-        # -------------------------------------------------
-        # FIND CLOSEST POWER REDUCTION
-        # -------------------------------------------------
-
-        valid_cf["power_distance"] = (
-            original_power
-            - valid_cf["power_W"]
-        )
-
-        best_cf = (
-            valid_cf
-            .sort_values("power_distance")
-            .iloc[0]
-        )
-
-
-        counterfactual_power = float(
-            best_cf["power_W"]
-        )
-
-
-        power_reduction = (
-            original_power
-            - counterfactual_power
-        )
-
-
-        # -------------------------------------------------
-        # CREATE MESSAGE
-        # -------------------------------------------------
-
-        message = (
-            "Reducing power from "
-            f"{original_power:.3f} W to "
-            f"approximately "
-            f"{counterfactual_power:.3f} W "
-            "would move this reading toward "
-            "the normal region of the anomaly detector."
-        )
-
-
-        # -------------------------------------------------
-        # SAVE RESULT
-        # -------------------------------------------------
-
-        results.append(
-            {
-                "timestamp":
-                    timestamp,
-
-                "original_power_W":
-                    round(
-                        original_power,
-                        3
-                    ),
-
-                "counterfactual_power_W":
-                    round(
-                        counterfactual_power,
-                        3
-                    ),
-
-                "power_reduction_W":
-                    round(
-                        power_reduction,
-                        3
-                    ),
-
-                "message":
-                    message
-            }
-        )
-
-
-        print(
-            "Original power:",
-            round(
-                original_power,
-                3
-            ),
-            "W"
-        )
-
-        print(
-            "Counterfactual:",
-            round(
-                counterfactual_power,
-                3
-            ),
-            "W"
-        )
-
-        print(
-            "Power reduction:",
-            round(
-                power_reduction,
-                3
-            ),
-            "W"
-        )
-
-
-    except Exception as error:
-
-        print(
-            "DiCE error:",
-            error
-        )
-
-        results.append(
-            {
-                "timestamp":
-                    timestamp,
-
-                "original_power_W":
-                    round(
-                        original_power,
-                        3
-                    ),
-
-                "counterfactual_power_W":
-                    None,
-
-                "power_reduction_W":
-                    None,
-
-                "message":
-                    "DiCE error: "
-                    + str(error)
-            }
-        )
-
-
-# =====================================================
-# SAVE RESULTS
-# =====================================================
-
-results_df = pd.DataFrame(results)
-
-results_df.to_csv(
-    OUTPUT_FILE,
-    index=False
+counterfactual_power = search_counterfactual_power(
+    model, context
 )
 
+method = np.where(
+    np.isnan(counterfactual_power),
+    "none",
+    "model_search"
+)
 
-# =====================================================
-# DISPLAY RESULTS
-# =====================================================
+# -------------------------------------------------
+# DiCE for the most recent events
+# -------------------------------------------------
 
-print()
-print("======================================")
-print("COUNTERFACTUAL RESULTS")
-print("======================================")
+if dice_ml is None:
 
-if len(results_df) > 0:
-
-    print(
-        results_df.to_string(
-            index=False
-        )
-    )
+    print("dice-ml not installed; using model search only.")
 
 else:
 
-    print("No results generated.")
+    print(
+        f"Running DiCE on the latest {MAX_DICE_ROWS} events..."
+    )
 
+    explainer = build_dice_explainer(
+        model,
+        to_context(classified),
+        classified["waste_type"]
+    )
+
+    dice_success = 0
+
+    for position in range(
+        max(0, len(context) - MAX_DICE_ROWS),
+        len(context)
+    ):
+
+        try:
+
+            power = dice_counterfactual_power(
+                explainer,
+                context.iloc[[position]]
+            )
+
+        except Exception as error:
+
+            print("  DiCE failed:", type(error).__name__)
+            continue
+
+        if not np.isnan(power):
+
+            counterfactual_power[position] = power
+            method[position] = "dice"
+            dice_success += 1
+
+    print(
+        f"DiCE found counterfactuals for "
+        f"{dice_success} events."
+    )
+
+# -------------------------------------------------
+# Rule fallback where nothing was found
+# -------------------------------------------------
+
+for position in np.flatnonzero(np.isnan(counterfactual_power)):
+
+    counterfactual_power[position] = rule_counterfactual_power(
+        anomalies["waste_type"].iloc[position],
+        context.iloc[position]
+    )
+
+    method[position] = "rule"
+
+# -------------------------------------------------
+# "What if someone were present?" (useful for IE)
+# -------------------------------------------------
+
+occupied = context.copy()
+occupied["presence_binary"] = 1
+
+if_present_class = predictor.classes[
+    model.class_probabilities(occupied).argmax(axis=1)
+]
+
+
+# =====================================================
+# SAVE
+# =====================================================
+
+original_power = anomalies["power_W"].to_numpy()
+
+results = pd.DataFrame({
+    "reading_id": anomalies["reading_id"].to_numpy(),
+    "timestamp": anomalies["timestamp"].to_numpy(),
+    "waste_type": anomalies["waste_type"].to_numpy(),
+    "original_power_W": original_power.round(3),
+    "counterfactual_power_W": np.round(counterfactual_power, 3),
+    "power_reduction_W": np.round(
+        original_power - counterfactual_power, 3
+    ),
+    "method": method,
+    "if_present_class": if_present_class,
+    "message": [
+        build_message(waste, original, cf, how)
+        for waste, original, cf, how in zip(
+            anomalies["waste_type"],
+            original_power,
+            counterfactual_power,
+            method
+        )
+    ]
+})
+
+results.to_csv(COUNTERFACTUAL_FILE, index=False)
+
+
+# =====================================================
+# SUMMARY
+# =====================================================
 
 print()
-print("Output:", OUTPUT_FILE)
+print("Method used:")
+print(results["method"].value_counts().to_string())
+
+print()
+print("Median power reduction by class (W):")
+print(
+    results.groupby("waste_type")["power_reduction_W"]
+    .median()
+    .round(3)
+    .to_string()
+)
+
+print()
+print(results.tail(5).to_string(index=False))
+
+print()
+print("Output:", COUNTERFACTUAL_FILE)
 
 print()
 print("======================================")

@@ -5,6 +5,8 @@ from pathlib import Path
 
 import paho.mqtt.client as mqtt
 
+from ml_config import LATEST_PREDICTION_FILE, MODEL_BUNDLE_FILE
+
 
 # =====================================================
 # MQTT CONFIGURATION
@@ -41,6 +43,54 @@ CSV_FIELDS = [
     "power_W",
     "status"
 ]
+
+
+# =====================================================
+# LIVE PREDICTION
+# =====================================================
+
+# One Predictor per circuit (each keeps its own short
+# reading history). Disabled if no model is trained.
+
+predictors = {}
+
+live_prediction_enabled = MODEL_BUNDLE_FILE.exists()
+
+
+def predict_live(circuit_id, row):
+
+    global live_prediction_enabled
+
+    if not live_prediction_enabled:
+        return None
+
+    try:
+
+        if circuit_id not in predictors:
+
+            from predict import Predictor
+
+            predictors[circuit_id] = Predictor()
+
+        prediction = predictors[circuit_id].predict_reading(row)
+
+        if prediction is None:
+            return None
+
+        # Write then rename so the API never reads a half file
+        temp_file = LATEST_PREDICTION_FILE.with_suffix(".tmp")
+        temp_file.write_text(json.dumps(prediction))
+        temp_file.replace(LATEST_PREDICTION_FILE)
+
+        return prediction
+
+    except Exception as error:
+
+        print("Live prediction disabled:", error)
+
+        live_prediction_enabled = False
+
+        return None
 
 
 # =====================================================
@@ -180,6 +230,16 @@ def on_message(client, userdata, message):
         print("Power :", row["power_W"], "W")
         print("Presence:", row["presence"])
         print("Status :", row["status"])
+
+        prediction = predict_live(circuit_id, row)
+
+        if prediction is not None:
+            print(
+                "Model  :",
+                prediction["waste_type"],
+                f"({prediction['waste_confidence']:.0%})"
+            )
+
         print("Saved :", csv_file)
         print("===============================")
 
@@ -213,6 +273,11 @@ print("======================================")
 print("Broker :", MQTT_BROKER)
 print("Port   :", MQTT_PORT)
 print("Topic  :", MQTT_TOPIC)
+print(
+    "Live ML:",
+    "enabled" if live_prediction_enabled
+    else "disabled (run train.py)"
+)
 
 print()
 print("Connecting to MQTT broker...")

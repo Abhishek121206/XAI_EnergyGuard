@@ -58,6 +58,14 @@
                     Explanations
                 </button>
 
+                <button
+                    class="nav-item"
+                    data-section="model"
+                >
+                    <span>04</span>
+                    Model
+                </button>
+
             </nav>
 
 
@@ -202,8 +210,11 @@
                             --
                         </div>
 
-                        <div class="stat-sub">
-                            detected
+                        <div
+                            class="stat-sub"
+                            id="anomalyDetail"
+                        >
+                            waste events
                         </div>
 
                     </div>
@@ -282,13 +293,24 @@
                             </div>
 
                             <div class="sensor-item">
-                                <span>Status</span>
+                                <span>Firmware Status</span>
                                 <strong
                                     id="currentStatus"
                                     class="status-text"
                                 >
                                     --
                                 </strong>
+                            </div>
+
+                            <div class="sensor-item">
+                                <span>Model Prediction</span>
+                                <strong
+                                    id="currentPrediction"
+                                    class="status-text"
+                                >
+                                    --
+                                </strong>
+                                <small id="currentPredictionConfidence"></small>
                             </div>
 
                         </div>
@@ -361,7 +383,8 @@
                                     <th>Current</th>
                                     <th>Presence</th>
                                     <th>Temperature</th>
-                                    <th>Status</th>
+                                    <th>Firmware</th>
+                                    <th>Model</th>
                                 </tr>
 
                             </thead>
@@ -398,11 +421,20 @@
                     </h3>
 
                     <p>
-                        Readings flagged by the anomaly detection
-                        and classification pipeline.
+                        Readings the model classified as idle
+                        equipment (IE), overconsumption (OC) or an
+                        unusual pattern (UP). Outlier score comes
+                        from the Isolation Forest: lower is more
+                        unusual.
                     </p>
 
                 </div>
+
+
+                <div
+                    class="class-chips"
+                    id="classChips"
+                ></div>
 
 
                 <div class="panel">
@@ -419,7 +451,7 @@
                                     <th>Presence</th>
                                     <th>Type</th>
                                     <th>Confidence</th>
-                                    <th>Score</th>
+                                    <th>Outlier Score</th>
                                 </tr>
 
                             </thead>
@@ -467,6 +499,110 @@
                     class="explanations-grid"
                     id="explanationsContainer"
                 >
+                </div>
+
+            </section>
+
+
+            <!-- ======================================
+                 MODEL
+            ======================================= -->
+
+            <section
+                id="model"
+                class="page-section"
+            >
+
+                <div class="section-heading">
+
+                    <p class="panel-kicker">
+                        MACHINE LEARNING
+                    </p>
+
+                    <h3>
+                        Model Performance
+                    </h3>
+
+                    <p id="modelInfo">
+                        --
+                    </p>
+
+                </div>
+
+
+                <div
+                    class="stats-grid"
+                    id="modelScores"
+                ></div>
+
+
+                <div class="content-grid">
+
+                    <div class="panel">
+
+                        <div class="panel-header">
+                            <div>
+                                <p class="panel-kicker">
+                                    HELD-OUT TEST SET
+                                </p>
+                                <h3>
+                                    Per-class Results (XGBoost)
+                                </h3>
+                            </div>
+                        </div>
+
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Class</th>
+                                        <th>Precision</th>
+                                        <th>Recall</th>
+                                        <th>F1</th>
+                                        <th>Samples</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="perClassTable">
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+
+
+                    <div class="panel">
+
+                        <div class="panel-header">
+                            <div>
+                                <p class="panel-kicker">
+                                    WHAT THE MODEL USES
+                                </p>
+                                <h3>
+                                    Feature Importance
+                                </h3>
+                            </div>
+                        </div>
+
+                        <div id="featureImportance"></div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <p class="panel-kicker">
+                        ABOUT THE LABELS
+                    </p>
+
+                    <p
+                        class="metric-note"
+                        id="labelNote"
+                    >
+                        --
+                    </p>
+
                 </div>
 
             </section>
